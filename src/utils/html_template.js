@@ -1,0 +1,482 @@
+import { renderSuites } from "./utils/render_suites";
+
+export function getHtmlTemplete(
+  suites,
+  specs,
+  options,
+  passRate,
+  totalDuration,
+  results,
+  total
+) {
+  return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${options.reportTitle}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                h1, h2, h3, h4 {
+                    margin-top: 20px;
+                }
+                .summary {
+                    background-color: #f5f5f5;
+                    padding: 15px;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                }
+                .summary-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                .progress-bar {
+                    height: 20px;
+                    background-color: #e9ecef;
+                    border-radius: 4px;
+                    margin-top: 10px;
+                    overflow: hidden;
+                }
+                .progress-bar-fill {
+                    height: 100%;
+                    background-color: #28a745;
+                    width: ${passRate}%;
+                }
+                .suite {
+                    margin-bottom: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+                .suite-header {
+                    padding: 10px 15px;
+                    background-color: #f8f9fa;
+                    border-bottom: 1px solid #ddd;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .suite-title {
+                    font-weight: bold;
+                }
+                .suite-stats {
+                    font-size: 0.9em;
+                    color: #666;
+                }
+                .suite-body {
+                    padding: 15px;
+                    display: ${options.collapseTests ? "none" : "block"};
+                }
+                .test {
+                    margin-bottom: 20px;
+                    padding: 15px;
+                    border-radius: 4px;
+                }
+                .test.passed {
+                    background-color: #d4edda;
+                }
+                .test.failed {
+                    background-color: #f8d7da;
+                }
+                .test.skipped {
+                    background-color: #e9ecef;
+                }
+                .test-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+                .test-title {
+                    font-weight: bold;
+                    font-size: 1.1em;
+                }
+                .test-duration {
+                    color: #666;
+                    font-size: 0.9em;
+                }
+                .test-error {
+                    margin-top: 10px;
+                    padding: 10px;
+                    background-color: #fff;
+                    border-radius: 4px;
+                    overflow-x: auto;
+                }
+                .logs {
+                    margin-top: 10px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-size: 0.9em;
+                }
+                .log-message {
+                    margin-bottom: 5px;
+                }
+                .log-message.info {
+                    color: #0c5460;
+                }
+                .log-message.error {
+                    color: #721c24;
+                }
+                .log-message.warn {
+                    color: #856404;
+                }
+                .screenshots {
+                    margin-top: 15px;
+                }
+                .screenshot-gallery {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                }
+                .screenshot-thumbnail {
+                    width: ${options.thumbnailWidth}px;
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+                .screenshot-thumbnail.active {
+                    border-color: #007bff;
+                }
+                .screenshot-thumbnail img {
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                }
+                .screenshot-display {
+                    display: none;
+                    margin-top: 15px;
+                }
+                .screenshot-display.active {
+                    display: block;
+                }
+                .screenshot-image {
+                    max-width: 100%;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                .screenshot-title {
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                }
+                .screenshot-timestamp {
+                    font-size: 0.85em;
+                    color: #666;
+                    margin-bottom: 10px;
+                }
+                .screenshot-pagination {
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 10px;
+                    gap: 5px;
+                }
+                .screenshot-page {
+                    padding: 5px 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    background-color: #f8f9fa;
+                }
+                .screenshot-page.active {
+                    background-color: #007bff;
+                    color: white;
+                    border-color: #007bff;
+                }
+                .expand-all, .collapse-all {
+                    margin-right: 10px;
+                    padding: 5px 10px;
+                    background-color: #f8f9fa;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 100;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.8);
+                    justify-content: center;
+                    align-items: center;
+                }
+                .modal-content {
+                    max-width: 90%;
+                    max-height: 90%;
+                }
+                .modal-content img {
+                    max-width: 100%;
+                    max-height: 90vh;
+                    display: block;
+                    margin: 0 auto;
+                }
+                .modal-close {
+                    position: absolute;
+                    top: 15px;
+                    right: 25px;
+                    font-size: 30px;
+                    color: white;
+                    cursor: pointer;
+                }
+                .modal-controls {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 0;
+                    width: 100%;
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
+                }
+                .modal-prev, .modal-next {
+                    background-color: rgba(255,255,255,0.7);
+                    color: #333;
+                    border: none;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 20px;
+                    cursor: pointer;
+                }
+                .modal-counter {
+                    color: white;
+                    font-size: 16px;
+                    background-color: rgba(0,0,0,0.5);
+                    padding: 5px 10px;
+                    border-radius: 15px;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>${options.reportTitle}</h1>
+            
+            <div class="summary">
+                <div class="summary-row">
+                    <div>Total Specs: ${specs.length}</div>
+                    <div>Duration: ${totalDuration}s</div>
+                </div>
+                <div class="summary-row">
+                    <div>Passed: ${results.passed}</div>
+                    <div>Failed: ${results.failed}</div>
+                    <div>Skipped: ${results.skipped}</div>
+                    <div>Total: ${total}</div>
+                    <div>Pass Rate: ${passRate}%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                </div>
+            </div>
+            
+            <h2>Test Results</h2>
+            <div>
+                <button class="expand-all">Expand All</button>
+                <button class="collapse-all">Collapse All</button>
+            </div>
+            ${renderSuites(suites)}
+            
+            <!-- Screenshot Modal -->
+            <div class="modal" id="screenshotModal">
+                <span class="modal-close">&times;</span>
+                <div class="modal-content">
+                    <img id="modalImage" src="" alt="Screenshot">
+                </div>
+                <div class="modal-controls">
+                    <button class="modal-prev">&larr;</button>
+                    <div class="modal-counter"><span id="currentIndex">1</span>/<span id="totalImages">1</span></div>
+                    <button class="modal-next">&rarr;</button>
+                </div>
+            </div>
+
+            <script>
+                // Add click handlers to expand/collapse suites
+                document.querySelectorAll('.suite-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const body = header.nextElementSibling;
+                        body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                    });
+                });
+                
+                // Expand all button
+                document.querySelector('.expand-all').addEventListener('click', () => {
+                    document.querySelectorAll('.suite-body').forEach(body => {
+                        body.style.display = 'block';
+                    });
+                });
+                
+                // Collapse all button
+                document.querySelector('.collapse-all').addEventListener('click', () => {
+                    document.querySelectorAll('.suite-body').forEach(body => {
+                        body.style.display = 'none';
+                    });
+                });
+
+                // Screenshot Gallery Functionality
+                function initScreenshotGalleries() {
+                    document.querySelectorAll('.screenshot-gallery').forEach(gallery => {
+                        const testId = gallery.getAttribute('data-test-id');
+                        const thumbnails = gallery.querySelectorAll('.screenshot-thumbnail');
+                        const displays = document.querySelectorAll(\`.screenshot-display[data-test-id="$\${testId}"]\`);
+                        
+                        // Set the first thumbnail and display as active
+                        if(thumbnails.length > 0) {
+                            thumbnails[0].classList.add('active');
+                            displays[0].classList.add('active');
+                        }
+                        
+                        // Add click handlers to thumbnails
+                        thumbnails.forEach((thumbnail, index) => {
+                            thumbnail.addEventListener('click', () => {
+                                // Remove active class from all thumbnails and displays
+                                thumbnails.forEach(t => t.classList.remove('active'));
+                                displays.forEach(d => d.classList.remove('active'));
+                                
+                                // Add active class to clicked thumbnail and corresponding display
+                                thumbnail.classList.add('active');
+                                displays[index].classList.add('active');
+                            });
+                        });
+                    });
+                }
+                
+                // Initialize pagination for screenshots
+                function initScreenshotPagination() {
+                    document.querySelectorAll('.screenshot-pagination').forEach(pagination => {
+                        const testId = pagination.getAttribute('data-test-id');
+                        const pageButtons = pagination.querySelectorAll('.screenshot-page');
+                        const galleries = document.querySelectorAll(\`.screenshot-gallery[data-test-id="\${testId}"]\`);
+                        
+                        // Set first page as active
+                        if(pageButtons.length > 0) {
+                            pageButtons[0].classList.add('active');
+                            galleries[0].style.display = 'flex';
+                            for(let i = 1; i < galleries.length; i++) {
+                                galleries[i].style.display = 'none';
+                            }
+                        }
+                        
+                        // Add click handlers to page buttons
+                        pageButtons.forEach((button, index) => {
+                            button.addEventListener('click', () => {
+                                // Remove active class from all buttons and hide all galleries
+                                pageButtons.forEach(b => b.classList.remove('active'));
+                                galleries.forEach(g => g.style.display = 'none');
+                                
+                                // Add active class to clicked button and show corresponding gallery
+                                button.classList.add('active');
+                                galleries[index].style.display = 'flex';
+                            });
+                        });
+                    });
+                }
+                
+                // Modal functionality for full-size image viewing
+                function initScreenshotModal() {
+                    const modal = document.getElementById('screenshotModal');
+                    const modalImg = document.getElementById('modalImage');
+                    const closeBtn = document.querySelector('.modal-close');
+                    const prevBtn = document.querySelector('.modal-prev');
+                    const nextBtn = document.querySelector('.modal-next');
+                    const currentIndexEl = document.getElementById('currentIndex');
+                    const totalImagesEl = document.getElementById('totalImages');
+                    
+                    let currentGallery = null;
+                    let currentIndex = 0;
+                    
+                    // Open modal when clicking on a display image
+                    document.querySelectorAll('.screenshot-image').forEach(img => {
+                        img.addEventListener('click', function() {
+                            const testId = this.closest('.screenshot-display').getAttribute('data-test-id');
+                            const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${testId}"] .screenshot-image\`);
+                            const imageIndex = Array.from(allImages).indexOf(this);
+                            
+                            modalImg.src = this.src;
+                            modal.style.display = 'flex';
+                            
+                            currentGallery = testId;
+                            currentIndex = imageIndex;
+                            updateModalCounter(allImages.length);
+                        });
+                    });
+                    
+                    // Close modal
+                    closeBtn.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                    });
+                    
+                    // Next image
+                    nextBtn.addEventListener('click', () => {
+                        if (!currentGallery) return;
+                        
+                        const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${currentGallery}"] .screenshot-image\`);
+                        currentIndex = (currentIndex + 1) % allImages.length;
+                        modalImg.src = allImages[currentIndex].src;
+                        updateModalCounter(allImages.length);
+                    });
+                    
+                    // Previous image
+                    prevBtn.addEventListener('click', () => {
+                        if (!currentGallery) return;
+                        
+                        const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${currentGallery}"] .screenshot-image\`);
+                        currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
+                        modalImg.src = allImages[currentIndex].src;
+                        updateModalCounter(allImages.length);
+                    });
+                    
+                    // Close on click outside of image
+                    modal.addEventListener('click', (e) => {
+                        if(e.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                    
+                    // Update counter text
+                    function updateModalCounter(total) {
+                        currentIndexEl.textContent = currentIndex + 1;
+                        totalImagesEl.textContent = total;
+                    }
+                    
+                    // Keyboard navigation
+                    document.addEventListener('keydown', (e) => {
+                        if (modal.style.display !== 'flex') return;
+                        
+                        if (e.key === 'Escape') {
+                            modal.style.display = 'none';
+                        } else if (e.key === 'ArrowRight') {
+                            nextBtn.click();
+                        } else if (e.key === 'ArrowLeft') {
+                            prevBtn.click();
+                        }
+                    });
+                }
+                
+                // Initialize all screenshot features
+                document.addEventListener('DOMContentLoaded', () => {
+                    initScreenshotGalleries();
+                    initScreenshotPagination();
+                    initScreenshotModal();
+                });
+            </script>
+        </body>
+        </html>
+        `;
+}
