@@ -1,4 +1,4 @@
-import { getHtmlTemplete } from "./utils/html_template";
+import { getHtmlTemplete } from "./utils/html_template.js";
 
 class CreateHTMLReport {
   createHtmlReport(suites, results, startTime, endTime, specs, options) {

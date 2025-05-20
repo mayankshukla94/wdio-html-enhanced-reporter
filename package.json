@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Light weight custom reporter for large wdio automation projects",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

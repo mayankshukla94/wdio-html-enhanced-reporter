@@ -1,4 +1,4 @@
-import { renderSuites } from "./utils/render_suites";
+import { renderSuites } from "./render_suites.js";
 
 export function getHtmlTemplete(
   suites,
@@ -352,37 +352,6 @@ export function getHtmlTemplete(
                                 // Add active class to clicked thumbnail and corresponding display
                                 thumbnail.classList.add('active');
                                 displays[index].classList.add('active');
-                            });
-                        });
-                    });
-                }
-                
-                // Initialize pagination for screenshots
-                function initScreenshotPagination() {
-                    document.querySelectorAll('.screenshot-pagination').forEach(pagination => {
-                        const testId = pagination.getAttribute('data-test-id');
-                        const pageButtons = pagination.querySelectorAll('.screenshot-page');
-                        const galleries = document.querySelectorAll(\`.screenshot-gallery[data-test-id="\${testId}"]\`);
-                        
-                        // Set first page as active
-                        if(pageButtons.length > 0) {
-                            pageButtons[0].classList.add('active');
-                            galleries[0].style.display = 'flex';
-                            for(let i = 1; i < galleries.length; i++) {
-                                galleries[i].style.display = 'none';
-                            }
-                        }
-                        
-                        // Add click handlers to page buttons
-                        pageButtons.forEach((button, index) => {
-                            button.addEventListener('click', () => {
-                                // Remove active class from all buttons and hide all galleries
-                                pageButtons.forEach(b => b.classList.remove('active'));
-                                galleries.forEach(g => g.style.display = 'none');
-                                
-                                // Add active class to clicked button and show corresponding gallery
-                                button.classList.add('active');
-                                galleries[index].style.display = 'flex';
                             });
                         });
                     });

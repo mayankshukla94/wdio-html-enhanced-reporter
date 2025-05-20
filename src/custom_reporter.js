@@ -2,7 +2,7 @@ import WDIOReporter from "@wdio/reporter";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, relative } from "path";
 
-import CreateHTMLReport from "./create_html_report";
+import CreateHTMLReport from "./create_html_report.js";
 
 const htmlReport = new CreateHTMLReport();
 
@@ -15,13 +15,16 @@ class CustomHtmlReporter extends WDIOReporter {
         reportTitle: "Test Report",
         showInBrowser: false,
         collapseTests: true,
-        // Screenshot options
-        screenshotDir: null, // If null, will use outputDir/screenshots
-        saveScreenshots: true, // Whether to save screenshots externally instead of embedding
-        thumbnailWidth: 200, // Width of thumbnails in the gallery view
+        screenshotDir: null,
+        saveScreenshots: true,
+        thumbnailWidth: 200,
       },
       options
     );
+
+    if (!options.logFile) {
+      options.logFile = `${options.outputDir}/logfile.txt`;
+    }
 
     super(options);
     this.options = options;
@@ -35,17 +38,13 @@ class CustomHtmlReporter extends WDIOReporter {
     this.startTime = null;
     this.endTime = null;
 
-    // Set screenshot directory
     this.options.screenshotDir =
       this.options.screenshotDir || join(this.options.outputDir, "screenshots");
 
-    // Create screenshot counter
     this.screenshotCounts = {};
+    this.currentTestUid = null;
+    this.testScreenshots = {};
 
-    this.currentTestUid = null; // Track currently running test
-    this.testScreenshots = {}; // Map test.uid -> array of screenshots
-
-    // Capture emitted screenshots
     process.on("test:screenshot", (filepath) => {
       if (this.currentTestUid) {
         if (!this.testScreenshots[this.currentTestUid]) {
@@ -69,6 +68,10 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onRunnerStart(runner) {
     this.startTime = new Date();
+
+    if (runner.specs && Array.isArray(runner.specs)) {
+      this.specs = runner.specs;
+    }
   }
 
   onSuiteStart(suite) {
@@ -76,26 +79,24 @@ class CustomHtmlReporter extends WDIOReporter {
       uid: suite.uid,
       title: suite.title,
       tests: [],
-      suites: [], // to support nested suites
-      parent: suite.parent,
+      suites: [],
+      parentUid: suite.parentUid,
     };
 
-    if (!suite.parent) {
-      // Top-level suite
+    if (!suite.parentUid) {
       this.suites.push(newSuite);
     } else {
-      // Find parent suite and nest under it
-      const parentSuite = this.findSuiteByTitle(suite.parent, this.suites);
+      const parentSuite = this.findSuiteByUid(suite.parentUid, this.suites);
       if (parentSuite) {
         parentSuite.suites.push(newSuite);
       } else {
-        console.log(`Parent suite not found: ${suite.parent}`);
+        console.log(`Parent suite not found for uid: ${suite.parentUid}`);
       }
     }
   }
 
   onTestStart(test) {
-    const currentSuite = this.findSuiteByTitle(test.parent, this.suites);
+    const currentSuite = this.findSuiteByUid(test.parentUid, this.suites);
     if (currentSuite) {
       currentSuite.tests.push({
         uid: test.uid,
@@ -127,11 +128,11 @@ class CustomHtmlReporter extends WDIOReporter {
     this.results.skipped++;
   }
 
-  findSuiteByTitle(title, suites = this.suites) {
+  findSuiteByUid(uid, suites = this.suites) {
     for (const suite of suites) {
-      if (suite.title === title) return suite;
+      if (suite.uid === uid) return suite;
       if (suite.suites?.length) {
-        const nested = this.findSuiteByTitle(title, suite.suites);
+        const nested = this.findSuiteByUid(uid, suite.suites);
         if (nested) return nested;
       }
     }
@@ -139,16 +140,13 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   updateTestStatus(test, state) {
-    const currentSuite = this.findSuiteByTitle(test.parent, this.suites);
-    console.log(currentSuite);
+    const currentSuite = this.findSuiteByUid(test.parentUid, this.suites);
     if (currentSuite) {
       const currentTest = currentSuite.tests.find((t) => t.uid === test.uid);
-      console.log(currentTest);
       if (currentTest) {
         currentTest.state = state;
         currentTest.duration = test.duration;
         currentTest.screenshots = this.testScreenshots[test.uid] || [];
-
         if (state === "failed" && test.error) {
           currentTest.error = {
             message: test.error.message,
@@ -160,11 +158,8 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onAfterCommand(command) {
-    // Handle screenshots from WebdriverIO's 'saveScreenshot' command
     if (command.method === "saveScreenshot" && command.result) {
-      const testUid = command.cid; // This might need adjustment based on WebdriverIO version
-
-      // Only process if we haven't reached the max screenshots for this test
+      const testUid = command.cid;
       if (this.screenshotCounts[testUid] < this.options.screenshotsPerTest) {
         this.handleScreenshot(
           command.result,
@@ -177,7 +172,6 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   handleScreenshot(base64Image, testUid, title) {
-    // Find the correct test
     let currentTest = null;
 
     for (const suite of this.suites) {
@@ -188,24 +182,20 @@ class CustomHtmlReporter extends WDIOReporter {
     if (!currentTest) return;
 
     if (this.options.saveScreenshots) {
-      // Ensure screenshot directory exists
       if (!existsSync(this.options.screenshotDir)) {
         mkdirSync(this.options.screenshotDir, { recursive: true });
       }
 
-      // Generate a filename based on test info
       const timestamp = new Date().toISOString().replace(/:/g, "-");
       const filename = `${timestamp}.png`;
       const filepath = join(this.options.screenshotDir, filename);
 
-      // Save the file
       const imageBuffer = Buffer.from(
         base64Image.replace(/^data:image\/png;base64,/, ""),
         "base64"
       );
       writeFileSync(filepath, imageBuffer);
 
-      // Store reference in the test
       const relativePath = relative(this.options.outputDir, filepath);
       currentTest.screenshots.push({
         title,
@@ -213,8 +203,6 @@ class CustomHtmlReporter extends WDIOReporter {
         timestamp: new Date(),
       });
     } else {
-      // Embed the image directly (can cause the string length issue with many screenshots)
-      // Limit to the first few screenshots to prevent memory issues
       if (currentTest.screenshots.length < this.options.screenshotsPerTest) {
         currentTest.screenshots.push({
           title,
@@ -225,23 +213,32 @@ class CustomHtmlReporter extends WDIOReporter {
     }
   }
 
+  onSuiteEnd(suite) {
+    const currentSuite = this.findSuiteByUid(suite.uid, this.suites);
+    if (currentSuite) {
+      currentSuite.end = new Date();
+      if (currentSuite.start) {
+        currentSuite.duration = currentSuite.end - currentSuite.start;
+      }
+    } else {
+      console.warn(`Suite with UID ${suite.uid} not found on end`);
+    }
+  }
+
   onRunnerEnd(runner) {
     this.endTime = new Date();
     this.generateReport();
   }
 
   onLogMessage(data) {
-    // Find the correct test to attach this log to
-    const currentSuite = this.suites.find((s) => s.uid === data.parent);
+    const currentSuite = this.findSuiteByUid(data.parentUid);
     if (currentSuite) {
       const currentTest = currentSuite.tests.find((t) => t.uid === data.uid);
       if (currentTest) {
-        // Only add a limited number of logs
         if (currentTest.logs.length < 50) {
-          // Limit to 50 logs per test
           currentTest.logs.push({
             level: data.level,
-            message: String(data.message).substring(0, 500), // Limit message length
+            message: String(data.message).substring(0, 500),
           });
         }
       }
@@ -249,19 +246,22 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   generateReport() {
-    // Create report directory if it doesn't exist
     if (!existsSync(this.options.outputDir)) {
       mkdirSync(this.options.outputDir, { recursive: true });
     }
 
-    // Generate HTML content
-    const htmlContent = htmlReport.createHtmlReport(this.suites);
+    const htmlContent = htmlReport.createHtmlReport(
+      this.suites,
+      this.results,
+      this.startTime,
+      this.endTime,
+      this.specs,
+      this.options
+    );
 
-    // Write the report to a file
     const reportPath = join(this.options.outputDir, this.options.filename);
     writeFileSync(reportPath, htmlContent);
 
-    // Open in browser if configured
     if (this.options.showInBrowser) {
       const open = require("open");
       open(reportPath);
