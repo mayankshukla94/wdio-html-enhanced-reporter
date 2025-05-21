@@ -98,7 +98,7 @@ class CustomHtmlReporter extends WDIOReporter {
   onTestStart(test) {
     const currentSuite = this.findSuiteByUid(test.parentUid, this.suites);
     if (currentSuite) {
-      currentSuite.tests.push({
+      const testEntry = {
         uid: test.uid,
         title: test.title,
         state: "pending",
@@ -106,7 +106,10 @@ class CustomHtmlReporter extends WDIOReporter {
         logs: [],
         screenshots: [],
         error: null,
-      });
+      };
+      currentSuite.tests.push(testEntry);
+
+      this.currentTest = testEntry;
     }
 
     this.currentTestUid = test.uid;
@@ -225,7 +228,7 @@ class CustomHtmlReporter extends WDIOReporter {
     }
   }
 
-  onRunnerEnd(runner) {
+  onRunnerEnd() {
     this.endTime = new Date();
     this.generateReport();
   }

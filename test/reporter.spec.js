@@ -17,13 +17,13 @@ describe("Custom HtmlReporter", function () {
     reporter = new CustomHtmlReporter(options);
   });
 
-  after(function () {
-    // Clean up report directory
-    const filePath = join(options.outputDir, options.filename);
-    if (existsSync(filePath)) {
-      rmSync(filePath);
-    }
-  });
+  // after(function () {
+  //   // Clean up report directory
+  //   const filePath = join(options.outputDir, options.filename);
+  //   if (existsSync(filePath)) {
+  //     rmSync(filePath);
+  //   }
+  // });
 
   it("should initialize with default options", function () {
     expect(reporter.options.outputDir).to.equal("./test-reports");
@@ -108,6 +108,9 @@ describe("Custom HtmlReporter", function () {
     });
     reporter.onSuiteStart(suite);
     reporter.onTestStart(test);
+
+    process.emit("test:log", "spec message is logged");
+
     reporter.onTestPass(test);
     reporter.onSuiteEnd(suite);
     reporter.onRunnerEnd({});
@@ -115,5 +118,39 @@ describe("Custom HtmlReporter", function () {
     const reportPath = join(options.outputDir, options.filename);
     expect(existsSync(reportPath)).to.be.true;
     expect(reporter.specs).to.include("test/specs/example1.spec.js");
+  });
+
+  it("should capture screenshots for a test", function () {
+    const suite = { uid: "s5", title: "Suite 5", parentUid: null };
+    const test = {
+      uid: "t5",
+      title: "Test with Screenshot",
+      parentUid: "s5",
+      duration: 120,
+    };
+
+    reporter.onRunnerStart({ specs: ["dummy.spec.js"] });
+    reporter.onSuiteStart(suite);
+    reporter.onTestStart(test);
+
+    // Simulate screenshot event
+    process.emit("test:screenshot", "test-reports/screenshots/test-snap-1.png");
+    process.emit("test:screenshot", "test-reports/screenshots/test-snap-2.png");
+
+    reporter.onTestPass(test);
+    reporter.onSuiteEnd(suite);
+    reporter.onRunnerEnd({});
+
+    // Locate the suite and test to verify screenshots
+    const foundSuite = reporter.suites.find((s) => s.uid === "s5");
+    const foundTest = foundSuite.tests.find((t) => t.uid === "t5");
+
+    expect(foundTest.screenshots).to.have.lengthOf(2);
+    expect(foundTest.screenshots[0].path).to.equal(
+      "test-reports/screenshots/test-snap-1.png"
+    );
+    expect(foundTest.screenshots[1].path).to.equal(
+      "test-reports/screenshots/test-snap-2.png"
+    );
   });
 });
