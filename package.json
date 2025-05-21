@@ -2,7 +2,7 @@
   "name": "wdio-custom-reporter",
   "version": "1.0.0",
   "description": "Light weight custom reporter for large wdio automation projects",
-  "main": "dist/custom_reporter.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "mocha"
