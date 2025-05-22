@@ -50,14 +50,11 @@ function renderTests(suite) {
             `
                 : ""
             }
-            
-            ${renderScreenshotGallery(test)}
-            
+
             ${
               test.logs.length > 0
                 ? `
             <div class="logs">
-                <h4>Logs</h4>
                 ${test.logs
                   .map(
                     (log) => `
@@ -71,6 +68,8 @@ function renderTests(suite) {
             `
                 : ""
             }
+            
+            ${renderScreenshotGallery(test)}
         </div>
         `
     )
@@ -105,7 +104,6 @@ function renderScreenshotGallery(test) {
 
   return `
         <div class="screenshots">
-          <h4>Screenshots (${test.screenshots.length})</h4>
           <div class="screenshot-gallery" data-test-id="${test.uid}">
             ${screenshotThumbnails}
           </div>

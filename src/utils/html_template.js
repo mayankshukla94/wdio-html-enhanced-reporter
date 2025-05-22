@@ -105,21 +105,21 @@ export function getHtmlTemplete(
                     font-size: 0.9em;
                 }
                 .test-error {
-                    margin-top: 10px;
-                    padding: 10px;
+                    margin-top: 5px;
+                    padding: 5px;
                     background-color: #fff;
                     border-radius: 4px;
                     overflow-x: auto;
                 }
                 .logs {
-                    margin-top: 10px;
-                    max-height: 200px;
+                    margin-top: 5px;
+                    max-height: 120px;
                     overflow-y: auto;
                     background-color: #f8f9fa;
-                    padding: 10px;
+                    padding: 5px;
                     border-radius: 4px;
                     font-family: monospace;
-                    font-size: 0.9em;
+                    font-size: 1.0em;
                 }
                 .log-message {
                     margin-bottom: 5px;
@@ -178,12 +178,6 @@ export function getHtmlTemplete(
                     font-size: 0.85em;
                     color: #666;
                     margin-bottom: 10px;
-                }
-                .screenshot-pagination {
-                    display: flex;
-                    justify-content: center;
-                    margin-top: 10px;
-                    gap: 5px;
                 }
                 .screenshot-page {
                     padding: 5px 10px;
