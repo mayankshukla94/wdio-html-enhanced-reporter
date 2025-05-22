@@ -29,6 +29,8 @@ class CustomHtmlReporter extends WDIOReporter {
     super(options);
     this.options = options;
     this.suites = [];
+    this.suiteMapByUid = new Map();
+    this.suiteMapByTitle = new Map();
     this.specs = [];
     this.results = {
       passed: 0,
@@ -80,6 +82,7 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onSuiteStart(suite) {
     const parentUid = suite.parentUid || suite.parent || null;
+
     const newSuite = {
       uid: suite.uid,
       title: suite.title,
@@ -88,10 +91,18 @@ class CustomHtmlReporter extends WDIOReporter {
       parentUid,
     };
 
+    if (!this.suiteMapByTitle.has(suite.title)) {
+      this.suiteMapByTitle.set(suite.title, []);
+    }
+    this.suiteMapByTitle.get(suite.title).push(newSuite);
+
     if (!parentUid) {
       this.suites.push(newSuite);
     } else {
-      const parentSuite = this.findSuiteByUid(parentUid, this.suites);
+      const parentSuite =
+        this.findSuiteByUid(parentUid, this.suites) ||
+        this.findLatestSuiteByTitle(parentUid);
+
       if (parentSuite) {
         parentSuite.suites.push(newSuite);
       } else {
@@ -103,7 +114,13 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onTestStart(test) {
     const parentUid = test.parentUid || test.parent || null;
-    const currentSuite = this.findSuiteByUid(parentUid, this.suites);
+    let currentSuite = this.findSuiteByUid(parentUid, this.suites);
+
+    if (!currentSuite && this.suiteMapByTitle.has(parentUid)) {
+      const candidateSuites = this.suiteMapByTitle.get(parentUid);
+      currentSuite = candidateSuites[candidateSuites.length - 1];
+    }
+
     const testEntry = {
       uid: test.uid,
       title: test.title,
@@ -142,30 +159,47 @@ class CustomHtmlReporter extends WDIOReporter {
     this.results.skipped++;
   }
 
+  findLatestSuiteByTitle(title) {
+    if (this.suiteMapByTitle?.has(title)) {
+      const list = this.suiteMapByTitle.get(title);
+      return list[list.length - 1];
+    }
+    return null;
+  }
+
   findSuiteByUid(uid, suites = this.suites) {
     for (const suite of suites) {
-      if (suite.uid === uid || suite.title === uid) {
+      if (suite.uid === uid) {
         return suite;
       }
 
       const nested = this.findSuiteByUid(uid, suite.suites);
-      if (nested) {
-        return nested;
-      }
+      if (nested) return nested;
     }
+
+    if (this.suiteMapByTitle?.has(uid)) {
+      const candidates = this.suiteMapByTitle.get(uid);
+      return candidates?.[candidates.length - 1] || null;
+    }
+
     return null;
   }
 
   updateTestStatus(test, state) {
     const parentUid = test.parentUid || test.parent || null;
-    const currentSuite = this.findSuiteByUid(parentUid, this.suites);
+    let currentSuite = this.findSuiteByUid(parentUid, this.suites);
+
+    if (!currentSuite && this.suiteMapByTitle.has(parentUid)) {
+      const candidateSuites = this.suiteMapByTitle.get(parentUid);
+      currentSuite = candidateSuites[candidateSuites.length - 1];
+    }
 
     if (currentSuite) {
       const currentTest = currentSuite.tests.find((t) => t.uid === test.uid);
       if (currentTest) {
         currentTest.state = state;
         currentTest.duration = test.duration || 0;
-        currentTest.screenshots = this.testScreenshots[test.uid] || [];
+        currentTest.screenshots = this.testScreenshots?.[test.uid] || [];
         currentTest.logs = this.testLogs?.[test.uid] || [];
 
         if (state === "failed" && test.error) {
@@ -174,15 +208,7 @@ class CustomHtmlReporter extends WDIOReporter {
             stack: test.error.stack,
           };
         }
-      } else {
-        console.warn(
-          `Test with uid ${test.uid} not found in suite ${parentUid}`
-        );
       }
-    } else {
-      console.warn(
-        `Suite not found for test: ${test.title}, parentUid/title: ${parentUid}`
-      );
     }
   }
 
