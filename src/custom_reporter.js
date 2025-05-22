@@ -44,6 +44,7 @@ class CustomHtmlReporter extends WDIOReporter {
     this.screenshotCounts = {};
     this.currentTestUid = null;
     this.testScreenshots = {};
+    this.testLogs = {};
 
     process.on("test:screenshot", (filepath) => {
       if (this.currentTestUid) {
@@ -60,8 +61,11 @@ class CustomHtmlReporter extends WDIOReporter {
     });
 
     process.on("test:log", (message) => {
-      if (this.currentTest) {
-        this.currentTest.logs.push({ level: "info", message });
+      if (this.currentTestUid) {
+        if (!this.testLogs[this.currentTestUid]) {
+          this.testLogs[this.currentTestUid] = [];
+        }
+        this.testLogs[this.currentTestUid].push({ level: "info", message });
       }
     });
   }
@@ -75,43 +79,50 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onSuiteStart(suite) {
+    const parentUid = suite.parentUid || suite.parent || null;
     const newSuite = {
       uid: suite.uid,
       title: suite.title,
       tests: [],
       suites: [],
-      parentUid: suite.parentUid,
+      parentUid,
     };
 
-    if (!suite.parentUid) {
+    if (!parentUid) {
       this.suites.push(newSuite);
     } else {
-      const parentSuite = this.findSuiteByUid(suite.parentUid, this.suites);
+      const parentSuite = this.findSuiteByUid(parentUid, this.suites);
       if (parentSuite) {
         parentSuite.suites.push(newSuite);
       } else {
-        console.log(`Parent suite not found for uid: ${suite.parentUid}`);
+        console.warn(`Parent suite not found for uid or title: ${parentUid}`);
+        this.suites.push(newSuite);
       }
     }
   }
 
   onTestStart(test) {
-    const currentSuite = this.findSuiteByUid(test.parentUid, this.suites);
-    if (currentSuite) {
-      const testEntry = {
-        uid: test.uid,
-        title: test.title,
-        state: "pending",
-        duration: 0,
-        logs: [],
-        screenshots: [],
-        error: null,
-      };
-      currentSuite.tests.push(testEntry);
+    const parentUid = test.parentUid || test.parent || null;
+    const currentSuite = this.findSuiteByUid(parentUid, this.suites);
+    const testEntry = {
+      uid: test.uid,
+      title: test.title,
+      state: "pending",
+      duration: 0,
+      logs: [],
+      screenshots: [],
+      error: null,
+    };
 
-      this.currentTest = testEntry;
+    if (currentSuite) {
+      currentSuite.tests.push(testEntry);
+    } else {
+      console.warn(
+        `Test '${test.title}' could not find suite with uid/title: ${parentUid}`
+      );
     }
 
+    this.currentTest = testEntry;
     this.currentTestUid = test.uid;
     this.screenshotCounts[test.uid] = 0;
   }
@@ -133,30 +144,45 @@ class CustomHtmlReporter extends WDIOReporter {
 
   findSuiteByUid(uid, suites = this.suites) {
     for (const suite of suites) {
-      if (suite.uid === uid) return suite;
-      if (suite.suites?.length) {
-        const nested = this.findSuiteByUid(uid, suite.suites);
-        if (nested) return nested;
+      if (suite.uid === uid || suite.title === uid) {
+        return suite;
+      }
+
+      const nested = this.findSuiteByUid(uid, suite.suites);
+      if (nested) {
+        return nested;
       }
     }
     return null;
   }
 
   updateTestStatus(test, state) {
-    const currentSuite = this.findSuiteByUid(test.parentUid, this.suites);
+    const parentUid = test.parentUid || test.parent || null;
+    const currentSuite = this.findSuiteByUid(parentUid, this.suites);
+
     if (currentSuite) {
       const currentTest = currentSuite.tests.find((t) => t.uid === test.uid);
       if (currentTest) {
         currentTest.state = state;
-        currentTest.duration = test.duration;
+        currentTest.duration = test.duration || 0;
         currentTest.screenshots = this.testScreenshots[test.uid] || [];
+        currentTest.logs = this.testLogs?.[test.uid] || [];
+
         if (state === "failed" && test.error) {
           currentTest.error = {
             message: test.error.message,
             stack: test.error.stack,
           };
         }
+      } else {
+        console.warn(
+          `Test with uid ${test.uid} not found in suite ${parentUid}`
+        );
       }
+    } else {
+      console.warn(
+        `Suite not found for test: ${test.title}, parentUid/title: ${parentUid}`
+      );
     }
   }
 
