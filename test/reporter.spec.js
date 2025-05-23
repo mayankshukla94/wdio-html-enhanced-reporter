@@ -133,7 +133,6 @@ describe("Custom HtmlReporter", function () {
     reporter.onSuiteStart(suite);
     reporter.onTestStart(test);
 
-    // Simulate screenshot event
     process.emit("test:screenshot", "test-reports/screenshots/test-snap-1.png");
     process.emit("test:screenshot", "test-reports/screenshots/test-snap-2.png");
 
@@ -141,7 +140,6 @@ describe("Custom HtmlReporter", function () {
     reporter.onSuiteEnd(suite);
     reporter.onRunnerEnd({});
 
-    // Locate the suite and test to verify screenshots
     const foundSuite = reporter.suites.find((s) => s.uid === "s5");
     const foundTest = foundSuite.tests.find((t) => t.uid === "t5");
 
