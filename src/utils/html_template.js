@@ -435,7 +435,6 @@ export function getHtmlTemplete(
                 // Initialize all screenshot features
                 document.addEventListener('DOMContentLoaded', () => {
                     initScreenshotGalleries();
-                    initScreenshotPagination();
                     initScreenshotModal();
                 });
             </script>
