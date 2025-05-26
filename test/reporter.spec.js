@@ -17,13 +17,13 @@ describe("Custom HtmlReporter", function () {
     reporter = new CustomHtmlReporter(options);
   });
 
-  // after(function () {
-  //   // Clean up report directory
-  //   const filePath = join(options.outputDir, options.filename);
-  //   if (existsSync(filePath)) {
-  //     rmSync(filePath);
-  //   }
-  // });
+  after(function () {
+    // Clean up report directory
+    const filePath = join(options.outputDir, options.filename);
+    if (existsSync(filePath)) {
+      rmSync(filePath);
+    }
+  });
 
   it("should initialize with default options", function () {
     expect(reporter.options.outputDir).to.equal("./test-reports");
