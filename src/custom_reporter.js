@@ -3,8 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, relative } from "path";
 
 import CreateHTMLReport from "./create_html_report.js";
-
-const htmlReport = new CreateHTMLReport();
+import Helper from "./utils/helper.js";
 
 class CustomHtmlReporter extends WDIOReporter {
   constructor(options) {
@@ -100,8 +99,8 @@ class CustomHtmlReporter extends WDIOReporter {
       this.suites.push(newSuite);
     } else {
       const parentSuite =
-        this.findSuiteByUid(parentUid, this.suites) ||
-        this.findLatestSuiteByTitle(parentUid);
+        Helper.findSuiteByUid(parentUid, this.suites, this.suiteMapByTitle) ||
+        Helper.findLatestSuiteByTitle(this.suiteMapByTitle, parentUid);
 
       if (parentSuite) {
         parentSuite.suites.push(newSuite);
@@ -114,7 +113,11 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onTestStart(test) {
     const parentUid = test.parentUid || test.parent || null;
-    let currentSuite = this.findSuiteByUid(parentUid, this.suites);
+    let currentSuite = Helper.findSuiteByUid(
+      parentUid,
+      this.suites,
+      this.suiteMapByTitle
+    );
 
     if (!currentSuite && this.suiteMapByTitle.has(parentUid)) {
       const candidateSuites = this.suiteMapByTitle.get(parentUid);
@@ -145,71 +148,39 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onTestPass(test) {
-    this.updateTestStatus(test, "passed");
+    Helper.updateTestStatus(
+      test,
+      "passed",
+      this.suiteMapByTitle,
+      this.suites,
+      this.testScreenshots,
+      this.testLogs
+    );
     this.results.passed++;
   }
 
   onTestFail(test) {
-    this.updateTestStatus(test, "failed");
+    Helper.updateTestStatus(
+      test,
+      "failed",
+      this.suiteMapByTitle,
+      this.suites,
+      this.testScreenshots,
+      this.testLogs
+    );
     this.results.failed++;
   }
 
   onTestSkip(test) {
-    this.updateTestStatus(test, "skipped");
+    Helper.updateTestStatus(
+      test,
+      "skipped",
+      this.suiteMapByTitle,
+      this.suites,
+      this.testScreenshots,
+      this.testLogs
+    );
     this.results.skipped++;
-  }
-
-  findLatestSuiteByTitle(title) {
-    if (this.suiteMapByTitle?.has(title)) {
-      const list = this.suiteMapByTitle.get(title);
-      return list[list.length - 1];
-    }
-    return null;
-  }
-
-  findSuiteByUid(uid, suites = this.suites) {
-    for (const suite of suites) {
-      if (suite.uid === uid) {
-        return suite;
-      }
-
-      const nested = this.findSuiteByUid(uid, suite.suites);
-      if (nested) return nested;
-    }
-
-    if (this.suiteMapByTitle?.has(uid)) {
-      const candidates = this.suiteMapByTitle.get(uid);
-      return candidates?.[candidates.length - 1] || null;
-    }
-
-    return null;
-  }
-
-  updateTestStatus(test, state) {
-    const parentUid = test.parentUid || test.parent || null;
-    let currentSuite = this.findSuiteByUid(parentUid, this.suites);
-
-    if (!currentSuite && this.suiteMapByTitle.has(parentUid)) {
-      const candidateSuites = this.suiteMapByTitle.get(parentUid);
-      currentSuite = candidateSuites[candidateSuites.length - 1];
-    }
-
-    if (currentSuite) {
-      const currentTest = currentSuite.tests.find((t) => t.uid === test.uid);
-      if (currentTest) {
-        currentTest.state = state;
-        currentTest.duration = test.duration || 0;
-        currentTest.screenshots = this.testScreenshots?.[test.uid] || [];
-        currentTest.logs = this.testLogs?.[test.uid] || [];
-
-        if (state === "failed" && test.error) {
-          currentTest.error = {
-            message: test.error.message,
-            stack: test.error.stack,
-          };
-        }
-      }
-    }
   }
 
   onAfterCommand(command) {
@@ -269,7 +240,11 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onSuiteEnd(suite) {
-    const currentSuite = this.findSuiteByUid(suite.uid, this.suites);
+    const currentSuite = Helper.findSuiteByUid(
+      suite.uid,
+      this.suites,
+      this.suiteMapByTitle
+    );
     if (currentSuite) {
       currentSuite.end = new Date();
       if (currentSuite.start) {
@@ -286,7 +261,11 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onLogMessage(data) {
-    const currentSuite = this.findSuiteByUid(data.parentUid);
+    const currentSuite = Helper.findSuiteByUid(
+      data.parentUid,
+      this.suites,
+      this.suiteMapByTitle
+    );
     if (currentSuite) {
       const currentTest = currentSuite.tests.find((t) => t.uid === data.uid);
       if (currentTest) {
@@ -305,7 +284,7 @@ class CustomHtmlReporter extends WDIOReporter {
       mkdirSync(this.options.outputDir, { recursive: true });
     }
 
-    const htmlContent = htmlReport.createHtmlReport(
+    const htmlContent = CreateHTMLReport.createHtmlReport(
       this.suites,
       this.results,
       this.startTime,
