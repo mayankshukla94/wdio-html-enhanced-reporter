@@ -20,4 +20,4 @@ class CreateHTMLReport {
   }
 }
 
-export default CreateHTMLReport;
+export default new CreateHTMLReport();
