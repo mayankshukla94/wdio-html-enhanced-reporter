@@ -1,0 +1,47 @@
+{
+  "name": "wdio-html-enhanced-reporter",
+  "version": "2.0.1",
+  "description": "Light weight custom reporter for large wdio automation projects",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayankshukla94/wdio-custom-reporter.git"
+  },
+  "keywords": [
+    "webdriverio",
+    "wdio",
+    "html",
+    "reporter",
+    "custom",
+    "reporter",
+    "wdio",
+    "reporter",
+    "test",
+    "reporter",
+    "webdriverio",
+    "reporter",
+    "automated",
+    "testing",
+    "screenshot",
+    "reporter",
+    "nodejs",
+    "reporter"
+  ],
+  "author": "Mayank Shukla",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mayankshukla94/wdio-custom-reporter/issues"
+  },
+  "homepage": "https://github.com/mayankshukla94/wdio-custom-reporter#readme",
+  "dependencies": {
+    "@wdio/reporter": "^9.12.6"
+  },
+  "devDependencies": {
+    "chai": "^5.2.0",
+    "mocha": "^11.3.0"
+  }
+}
