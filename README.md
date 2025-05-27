@@ -29,22 +29,21 @@ npm install wdio-html-enhanced-reporter --save-dev
 ## Update your wdio.conf.js:
 
 ```js
-exports.config = {
-  const SCREENSHOT_DIR = 'test-reports/screenshots';
+const SCREENSHOT_DIR = "test-reports/screenshots";
 
+exports.config = {
   reporters: [
-    'spec',
+    "spec",
     [
-      'html-enhanced',
+      "html-enhanced",
       {
-        outputDir: './test-reports',
-        filename: 'my-report.html',
-        reportTitle: 'Custom Report',
+        outputDir: "./test-reports",
+        filename: "my-report.html",
+        reportTitle: "Custom Report",
         showInBrowser: false,
         screenshotDir: SCREENSHOT_DIR,
       },
     ],
   ],
 };
-
 ```
