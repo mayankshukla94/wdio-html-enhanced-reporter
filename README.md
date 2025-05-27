@@ -1,4 +1,4 @@
-# 🧾 wdio-custom-html-reporter
+# 🧾 wdio-html-enhanced-reporter
 
 A **clean**, **lightweight**, and **customizable HTML reporter** for WebdriverIO, built on top of `@wdio/reporter`. This reporter provides a structured, interactive test report with support for nested suites, logs, screenshots, and test status indicators — all rendered with plain HTML, CSS, and vanilla JavaScript.
 
@@ -20,7 +20,7 @@ A **clean**, **lightweight**, and **customizable HTML reporter** for WebdriverIO
 ## 🛠️ Installation
 
 ```bash
-npm install wdio-custom-html-reporter --save-dev
+npm install wdio-html-enhanced-reporter --save-dev
 
 ```
 
@@ -35,7 +35,7 @@ exports.config = {
   reporters: [
     'spec',
     [
-      'custom-html',
+      'html-enhanced',
       {
         outputDir: './test-reports',
         filename: 'my-report.html',
