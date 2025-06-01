@@ -45,5 +45,24 @@ exports.config = {
       },
     ],
   ],
+
+  onPrepare: function () {
+    // Create screenshots directory if it doesn't exist
+    if (!fs.existsSync(SCREENSHOT_DIR)) {
+      fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+    }
+  },
+
+  afterTest: async function (test) {
+    // Generate a filename based on test info and timestamp
+    const timestamp = DateTime.now().toFormat("yyyyMMdd-HHmmss.u");
+    const filepath = path.join(SCREENSHOT_DIR, `${timestamp}.png`);
+    const relativeFilePath = `./screenshots/${path.basename(filepath)}`;
+
+    // Save the screenshot
+    await browser.saveScreenshot(filepath);
+
+    process.emit("test:screenshot", relativeFilePath);
+  },
 };
 ```
