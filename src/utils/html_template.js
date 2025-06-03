@@ -149,6 +149,9 @@ export function getHtmlTemplete(
                     border-radius: 4px;
                     overflow: hidden;
                 }
+                .screenshot-thumbnail.expand{
+                    width: 1024px;
+                }
                 .screenshot-thumbnail.active {
                     border-color: #007bff;
                 }
@@ -262,7 +265,7 @@ export function getHtmlTemplete(
         </head>
         <body>
             <h1>${options.reportTitle}</h1>
-            
+
             <div class="summary">
                 <div class="summary-row">
                     <div>Total Specs: ${specs.length}</div>
@@ -279,14 +282,14 @@ export function getHtmlTemplete(
                     <div class="progress-bar-fill"></div>
                 </div>
             </div>
-            
+
             <h2>Test Results</h2>
             <div>
                 <button class="expand-all">Expand All</button>
                 <button class="collapse-all">Collapse All</button>
             </div>
             ${renderSuites(suites)}
-            
+
             <!-- Screenshot Modal -->
             <div class="modal" id="screenshotModal">
                 <span class="modal-close">&times;</span>
@@ -308,14 +311,14 @@ export function getHtmlTemplete(
                         body.style.display = body.style.display === 'none' ? 'block' : 'none';
                     });
                 });
-                
+
                 // Expand all button
                 document.querySelector('.expand-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
                         body.style.display = 'block';
                     });
                 });
-                
+
                 // Collapse all button
                 document.querySelector('.collapse-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
@@ -329,20 +332,20 @@ export function getHtmlTemplete(
                         const testId = gallery.getAttribute('data-test-id');
                         const thumbnails = gallery.querySelectorAll('.screenshot-thumbnail');
                         const displays = document.querySelectorAll(\`.screenshot-display[data-test-id="$\${testId}"]\`);
-                        
+
                         // Set the first thumbnail and display as active
                         if(thumbnails.length > 0) {
                             thumbnails[0].classList.add('active');
                             displays[0].classList.add('active');
                         }
-                        
+
                         // Add click handlers to thumbnails
                         thumbnails.forEach((thumbnail, index) => {
                             thumbnail.addEventListener('click', () => {
                                 // Remove active class from all thumbnails and displays
                                 thumbnails.forEach(t => t.classList.remove('active'));
                                 displays.forEach(d => d.classList.remove('active'));
-                                
+
                                 // Add active class to clicked thumbnail and corresponding display
                                 thumbnail.classList.add('active');
                                 displays[index].classList.add('active');
@@ -350,7 +353,7 @@ export function getHtmlTemplete(
                         });
                     });
                 }
-                
+
                 // Modal functionality for full-size image viewing
                 function initScreenshotModal() {
                     const modal = document.getElementById('screenshotModal');
@@ -360,68 +363,68 @@ export function getHtmlTemplete(
                     const nextBtn = document.querySelector('.modal-next');
                     const currentIndexEl = document.getElementById('currentIndex');
                     const totalImagesEl = document.getElementById('totalImages');
-                    
+
                     let currentGallery = null;
                     let currentIndex = 0;
-                    
+
                     // Open modal when clicking on a display image
                     document.querySelectorAll('.screenshot-image').forEach(img => {
                         img.addEventListener('click', function() {
                             const testId = this.closest('.screenshot-display').getAttribute('data-test-id');
                             const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${testId}"] .screenshot-image\`);
                             const imageIndex = Array.from(allImages).indexOf(this);
-                            
+
                             modalImg.src = this.src;
                             modal.style.display = 'flex';
-                            
+
                             currentGallery = testId;
                             currentIndex = imageIndex;
                             updateModalCounter(allImages.length);
                         });
                     });
-                    
+
                     // Close modal
                     closeBtn.addEventListener('click', () => {
                         modal.style.display = 'none';
                     });
-                    
+
                     // Next image
                     nextBtn.addEventListener('click', () => {
                         if (!currentGallery) return;
-                        
+
                         const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${currentGallery}"] .screenshot-image\`);
                         currentIndex = (currentIndex + 1) % allImages.length;
                         modalImg.src = allImages[currentIndex].src;
                         updateModalCounter(allImages.length);
                     });
-                    
+
                     // Previous image
                     prevBtn.addEventListener('click', () => {
                         if (!currentGallery) return;
-                        
+
                         const allImages = document.querySelectorAll(\`.screenshot-display[data-test-id="\${currentGallery}"] .screenshot-image\`);
                         currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
                         modalImg.src = allImages[currentIndex].src;
                         updateModalCounter(allImages.length);
                     });
-                    
+
                     // Close on click outside of image
                     modal.addEventListener('click', (e) => {
                         if(e.target === modal) {
                             modal.style.display = 'none';
                         }
                     });
-                    
+
                     // Update counter text
                     function updateModalCounter(total) {
                         currentIndexEl.textContent = currentIndex + 1;
                         totalImagesEl.textContent = total;
                     }
-                    
+
                     // Keyboard navigation
                     document.addEventListener('keydown', (e) => {
                         if (modal.style.display !== 'flex') return;
-                        
+
                         if (e.key === 'Escape') {
                             modal.style.display = 'none';
                         } else if (e.key === 'ArrowRight') {
@@ -431,12 +434,18 @@ export function getHtmlTemplete(
                         }
                     });
                 }
-                
+
                 // Initialize all screenshot features
                 document.addEventListener('DOMContentLoaded', () => {
                     initScreenshotGalleries();
                     initScreenshotModal();
                 });
+
+                document.querySelector("div.suite-body").addEventListener("click", function(event) {
+                  if(event.target.nodeName === 'IMG'){
+                    event.target.parentNode.classList.toggle('screenshot-thumbnail.expand')
+                  }
+                })
             </script>
         </body>
         </html>
