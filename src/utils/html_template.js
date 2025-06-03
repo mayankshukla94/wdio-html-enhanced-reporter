@@ -149,7 +149,7 @@ export function getHtmlTemplete(
                     border-radius: 4px;
                     overflow: hidden;
                 }
-                .screenshot-thumbnail.expand{
+                .screenshot-thumbnail--expand{
                     width: 1024px;
                 }
                 .screenshot-thumbnail.active {
@@ -443,7 +443,7 @@ export function getHtmlTemplete(
 
                 document.querySelector("div.suite-body").addEventListener("click", function(event) {
                   if(event.target.nodeName === 'IMG'){
-                    event.target.parentNode.classList.toggle('screenshot-thumbnail.expand')
+                    event.target.parentNode.classList.toggle('screenshot-thumbnail--expand')
                   }
                 })
             </script>
