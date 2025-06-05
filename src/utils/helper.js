@@ -25,14 +25,7 @@ class Helper {
     return null;
   }
 
-  updateTestStatus(
-    test,
-    state,
-    suiteMapByTitle,
-    suites,
-    testScreenshots,
-    testLogs
-  ) {
+  updateTestStatus(test, state, suiteMapByTitle, suites, testScreenshots, testLogs) {
     const parentUid = test.parentUid || test.parent || null;
     let currentSuite = this.findSuiteByUid(parentUid, suites, suiteMapByTitle);
 
@@ -42,14 +35,14 @@ class Helper {
     }
 
     if (currentSuite) {
-      const currentTest = currentSuite.tests.find((t) => t.uid === test.uid);
+      const currentTest = currentSuite.tests.find(t => t.uid === test.uid);
       if (currentTest) {
         currentTest.state = state;
         currentTest.duration = test.duration || 0;
         currentTest.screenshots = testScreenshots?.[test.uid] || [];
         currentTest.logs = testLogs?.[test.uid] || [];
 
-        if (state === "failed" && test.error) {
+        if (state === 'failed' && test.error) {
           currentTest.error = {
             message: test.error.message,
             stack: test.error.stack,

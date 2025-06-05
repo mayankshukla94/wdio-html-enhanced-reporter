@@ -1,3 +1,3 @@
-import CustomHtmlReporter from "./src/custom_reporter.js";
+import CustomHtmlReporter from './src/custom_reporter.js';
 
 export default CustomHtmlReporter;
