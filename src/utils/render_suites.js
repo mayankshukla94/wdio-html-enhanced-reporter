@@ -1,20 +1,28 @@
 export function renderSuites(suites) {
-  return suites.map((suite) => renderSuite(suite)).join("");
+  return suites.map(suite => renderSuite(suite)).join('');
 }
 
 function renderSuite(suite) {
   const tests = suite.tests || [];
-  const passed = tests.filter((t) => t.state === "passed").length;
-  const failed = tests.filter((t) => t.state === "failed").length;
-  const skipped = tests.filter((t) => t.state === "skipped").length;
+  const passed = tests.filter(t => t.state === 'passed').length;
+  const failed = tests.filter(t => t.state === 'failed').length;
+  const skipped = tests.filter(t => t.state === 'skipped').length;
   const total = tests.length;
 
   // ✅ Recursively render child suites
-  const childSuitesHtml = (suite.suites || [])
-    .map((child) => renderSuite(child))
-    .join("");
+  const childSuitesHtml = (suite.suites || []).map(child => renderSuite(child)).join('');
 
-  return `
+  return `${
+    suite.file
+      ? `
+      <div class="spec-file-name">
+        <p class="spec-file">
+          ${suite.file ? suite.file : ''}
+        </p>
+      </div>`
+      : ''
+  }
+
       <div class="suite">
         <div class="suite-header">
           <div class="suite-title">${suite.title}</div>
@@ -33,7 +41,7 @@ function renderSuite(suite) {
 function renderTests(suite) {
   return suite.tests
     .map(
-      (test) => `
+      test => `
         <div class="test ${test.state}">
             <div class="test-header">
                 <div class="test-title">${test.title}</div>
@@ -48,7 +56,7 @@ function renderTests(suite) {
                 <pre>${test.error.stack}</pre>
             </div>
             `
-                : ""
+                : ''
             }
 
             ${
@@ -57,28 +65,26 @@ function renderTests(suite) {
             <div class="logs">
                 ${test.logs
                   .map(
-                    (log) => `
-                <div class="log-message ${
-                  log.level
-                }">${log.level.toUpperCase()}: ${escapeHtml(log.message)}</div>
-                `
+                    log => `
+                <div class="log-message ${log.level}">${log.level.toUpperCase()}: ${escapeHtml(log.message)}</div>
+                `,
                   )
-                  .join("")}
+                  .join('')}
             </div>
             `
-                : ""
+                : ''
             }
             
             ${renderScreenshotGallery(test)}
         </div>
-        `
+        `,
     )
-    .join("");
+    .join('');
 }
 
 function renderScreenshotGallery(test) {
   if (!test.screenshots || test.screenshots.length === 0) {
-    return "";
+    return '';
   }
 
   const screenshotThumbnails = test.screenshots
@@ -87,36 +93,24 @@ function renderScreenshotGallery(test) {
           <div class="screenshot-thumbnail" data-index="${index}">
             <img class="screenshot-image" src="${screenshot.path}" alt="${screenshot.title}" loading="lazy">
           </div>
-        `
+        `,
     )
-    .join("");
-
-  const screenshotDisplays = test.screenshots
-    .map(
-      (screenshot, index) => `
-          <div class="screenshot-display" data-test-id="${test.uid}" data-index="${index}">
-            <div class="screenshot-title">${screenshot.title}</div>
-            <img class="screenshot-image" src="${screenshot.path}" alt="${screenshot.title}" loading="lazy">
-          </div>
-        `
-    )
-    .join("");
+    .join('');
 
   return `
         <div class="screenshots">
           <div class="screenshot-gallery" data-test-id="${test.uid}">
             ${screenshotThumbnails}
           </div>
-          ${screenshotDisplays}
         </div>
       `;
 }
 
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
