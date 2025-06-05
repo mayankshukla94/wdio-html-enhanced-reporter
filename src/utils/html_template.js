@@ -1,14 +1,6 @@
-import { renderSuites } from "./render_suites.js";
+import { renderSuites } from './render_suites.js';
 
-export function getHtmlTemplete(
-  suites,
-  specs,
-  options,
-  passRate,
-  totalDuration,
-  results,
-  total
-) {
+export function getHtmlTemplete(suites, specs, options, passRate, totalDuration, results, total) {
   return `
         <!DOCTYPE html>
         <html lang="en">
@@ -86,7 +78,7 @@ export function getHtmlTemplete(
                 }
                 .suite-body {
                     padding: 15px;
-                    display: ${options.collapseTests ? "none" : "block"};
+                    display: ${options.collapseTests ? 'none' : 'block'};
                 }
                 .test {
                     margin-bottom: 20px;
