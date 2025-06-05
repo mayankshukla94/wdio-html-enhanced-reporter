@@ -1,24 +1,24 @@
-import WDIOReporter from "@wdio/reporter";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
-import { join, relative } from "path";
+import WDIOReporter from '@wdio/reporter';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join, relative } from 'path';
 
-import CreateHTMLReport from "./create_html_report.js";
-import Helper from "./utils/helper.js";
+import CreateHTMLReport from './create_html_report.js';
+import Helper from './utils/helper.js';
 
 class CustomHtmlReporter extends WDIOReporter {
   constructor(options) {
     options = Object.assign(
       {
-        outputDir: "./reports",
-        filename: "wdio-custom-html-reporter.html",
-        reportTitle: "Test Report",
+        outputDir: './reports',
+        filename: 'wdio-custom-html-reporter.html',
+        reportTitle: 'Test Report',
         showInBrowser: false,
         collapseTests: true,
         screenshotDir: null,
         saveScreenshots: true,
         thumbnailWidth: 200,
       },
-      options
+      options,
     );
 
     if (!options.logFile) {
@@ -39,44 +39,39 @@ class CustomHtmlReporter extends WDIOReporter {
     this.startTime = null;
     this.endTime = null;
 
-    this.options.screenshotDir =
-      this.options.screenshotDir || join(this.options.outputDir, "screenshots");
+    this.options.screenshotDir = this.options.screenshotDir || join(this.options.outputDir, 'screenshots');
 
     this.screenshotCounts = {};
     this.currentTestUid = null;
     this.testScreenshots = {};
     this.testLogs = {};
 
-    process.on("test:screenshot", (filepath) => {
+    process.on('test:screenshot', filepath => {
       if (this.currentTestUid) {
         if (!this.testScreenshots[this.currentTestUid]) {
           this.testScreenshots[this.currentTestUid] = [];
         }
         this.testScreenshots[this.currentTestUid].push({
           path: filepath,
-          title: `Screenshot ${
-            this.testScreenshots[this.currentTestUid].length + 1
-          }`,
+          title: `Screenshot ${this.testScreenshots[this.currentTestUid].length + 1}`,
         });
       }
     });
 
-    process.on("test:log", (message) => {
+    process.on('test:log', message => {
       if (this.currentTestUid) {
         if (!this.testLogs[this.currentTestUid]) {
           this.testLogs[this.currentTestUid] = [];
         }
-        this.testLogs[this.currentTestUid].push({ level: "info", message });
+        this.testLogs[this.currentTestUid].push({ level: 'info', message });
       }
     });
   }
 
   onRunnerStart(runner) {
     this.startTime = new Date();
-
-    if (runner.specs && Array.isArray(runner.specs)) {
-      this.specs = runner.specs;
-    }
+    this.specs = runner.specs || [];
+    this.specFileIndex = 0;
   }
 
   onSuiteStart(suite) {
@@ -88,6 +83,10 @@ class CustomHtmlReporter extends WDIOReporter {
       tests: [],
       suites: [],
       parentUid,
+      file:
+        !parentUid && this.specs && this.specFileIndex < this.specs.length
+          ? new URL(this.specs[this.specFileIndex++]).pathname
+          : '',
     };
 
     if (!this.suiteMapByTitle.has(suite.title)) {
@@ -113,11 +112,7 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onTestStart(test) {
     const parentUid = test.parentUid || test.parent || null;
-    let currentSuite = Helper.findSuiteByUid(
-      parentUid,
-      this.suites,
-      this.suiteMapByTitle
-    );
+    let currentSuite = Helper.findSuiteByUid(parentUid, this.suites, this.suiteMapByTitle);
 
     if (!currentSuite && this.suiteMapByTitle.has(parentUid)) {
       const candidateSuites = this.suiteMapByTitle.get(parentUid);
@@ -127,7 +122,7 @@ class CustomHtmlReporter extends WDIOReporter {
     const testEntry = {
       uid: test.uid,
       title: test.title,
-      state: "pending",
+      state: 'pending',
       duration: 0,
       logs: [],
       screenshots: [],
@@ -137,9 +132,7 @@ class CustomHtmlReporter extends WDIOReporter {
     if (currentSuite) {
       currentSuite.tests.push(testEntry);
     } else {
-      console.warn(
-        `Test '${test.title}' could not find suite with uid/title: ${parentUid}`
-      );
+      console.warn(`Test '${test.title}' could not find suite with uid/title: ${parentUid}`);
     }
 
     this.currentTest = testEntry;
@@ -148,50 +141,25 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onTestPass(test) {
-    Helper.updateTestStatus(
-      test,
-      "passed",
-      this.suiteMapByTitle,
-      this.suites,
-      this.testScreenshots,
-      this.testLogs
-    );
+    Helper.updateTestStatus(test, 'passed', this.suiteMapByTitle, this.suites, this.testScreenshots, this.testLogs);
     this.results.passed++;
   }
 
   onTestFail(test) {
-    Helper.updateTestStatus(
-      test,
-      "failed",
-      this.suiteMapByTitle,
-      this.suites,
-      this.testScreenshots,
-      this.testLogs
-    );
+    Helper.updateTestStatus(test, 'failed', this.suiteMapByTitle, this.suites, this.testScreenshots, this.testLogs);
     this.results.failed++;
   }
 
   onTestSkip(test) {
-    Helper.updateTestStatus(
-      test,
-      "skipped",
-      this.suiteMapByTitle,
-      this.suites,
-      this.testScreenshots,
-      this.testLogs
-    );
+    Helper.updateTestStatus(test, 'skipped', this.suiteMapByTitle, this.suites, this.testScreenshots, this.testLogs);
     this.results.skipped++;
   }
 
   onAfterCommand(command) {
-    if (command.method === "saveScreenshot" && command.result) {
+    if (command.method === 'saveScreenshot' && command.result) {
       const testUid = command.cid;
       if (this.screenshotCounts[testUid] < this.options.screenshotsPerTest) {
-        this.handleScreenshot(
-          command.result,
-          testUid,
-          `Screenshot ${this.screenshotCounts[testUid] + 1}`
-        );
+        this.handleScreenshot(command.result, testUid, `Screenshot ${this.screenshotCounts[testUid] + 1}`);
         this.screenshotCounts[testUid]++;
       }
     }
@@ -201,7 +169,7 @@ class CustomHtmlReporter extends WDIOReporter {
     let currentTest = null;
 
     for (const suite of this.suites) {
-      currentTest = suite.tests.find((t) => t.uid === testUid);
+      currentTest = suite.tests.find(t => t.uid === testUid);
       if (currentTest) break;
     }
 
@@ -212,14 +180,11 @@ class CustomHtmlReporter extends WDIOReporter {
         mkdirSync(this.options.screenshotDir, { recursive: true });
       }
 
-      const timestamp = new Date().toISOString().replace(/:/g, "-");
+      const timestamp = new Date().toISOString().replace(/:/g, '-');
       const filename = `${timestamp}.png`;
       const filepath = join(this.options.screenshotDir, filename);
 
-      const imageBuffer = Buffer.from(
-        base64Image.replace(/^data:image\/png;base64,/, ""),
-        "base64"
-      );
+      const imageBuffer = Buffer.from(base64Image.replace(/^data:image\/png;base64,/, ''), 'base64');
       writeFileSync(filepath, imageBuffer);
 
       const relativePath = relative(this.options.outputDir, filepath);
@@ -240,11 +205,7 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onSuiteEnd(suite) {
-    const currentSuite = Helper.findSuiteByUid(
-      suite.uid,
-      this.suites,
-      this.suiteMapByTitle
-    );
+    const currentSuite = Helper.findSuiteByUid(suite.uid, this.suites, this.suiteMapByTitle);
     if (currentSuite) {
       currentSuite.end = new Date();
       if (currentSuite.start) {
@@ -261,13 +222,9 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onLogMessage(data) {
-    const currentSuite = Helper.findSuiteByUid(
-      data.parentUid,
-      this.suites,
-      this.suiteMapByTitle
-    );
+    const currentSuite = Helper.findSuiteByUid(data.parentUid, this.suites, this.suiteMapByTitle);
     if (currentSuite) {
-      const currentTest = currentSuite.tests.find((t) => t.uid === data.uid);
+      const currentTest = currentSuite.tests.find(t => t.uid === data.uid);
       if (currentTest) {
         if (currentTest.logs.length < 50) {
           currentTest.logs.push({
@@ -290,14 +247,14 @@ class CustomHtmlReporter extends WDIOReporter {
       this.startTime,
       this.endTime,
       this.specs,
-      this.options
+      this.options,
     );
 
     const reportPath = join(this.options.outputDir, this.options.filename);
     writeFileSync(reportPath, htmlContent);
 
     if (this.options.showInBrowser) {
-      const open = require("open");
+      const open = require('open');
       open(reportPath);
     }
 

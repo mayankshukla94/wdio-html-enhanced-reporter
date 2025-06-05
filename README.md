@@ -29,17 +29,17 @@ npm install wdio-html-enhanced-reporter --save-dev
 ## Update your wdio.conf.js:
 
 ```js
-const SCREENSHOT_DIR = "test-reports/screenshots";
+const SCREENSHOT_DIR = 'test-reports/screenshots';
 
 exports.config = {
   reporters: [
-    "spec",
+    'spec',
     [
-      "html-enhanced",
+      'html-enhanced',
       {
-        outputDir: "./test-reports",
-        filename: "my-report.html",
-        reportTitle: "Custom Report",
+        outputDir: './test-reports',
+        filename: 'my-report.html',
+        reportTitle: 'Custom Report',
         showInBrowser: false,
         screenshotDir: SCREENSHOT_DIR,
       },
@@ -55,14 +55,14 @@ exports.config = {
 
   afterTest: async function (test) {
     // Generate a filename based on test info and timestamp
-    const timestamp = DateTime.now().toFormat("yyyyMMdd-HHmmss.u");
+    const timestamp = DateTime.now().toFormat('yyyyMMdd-HHmmss.u');
     const filepath = path.join(SCREENSHOT_DIR, `${timestamp}.png`);
     const relativeFilePath = `./screenshots/${path.basename(filepath)}`;
 
     // Save the screenshot
     await browser.saveScreenshot(filepath);
 
-    process.emit("test:screenshot", relativeFilePath);
+    process.emit('test:screenshot', relativeFilePath);
   },
 };
 ```

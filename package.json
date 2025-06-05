@@ -38,7 +38,8 @@
   },
   "homepage": "https://github.com/mayankshukla94/wdio-custom-reporter#readme",
   "dependencies": {
-    "@wdio/reporter": "^9.12.6"
+    "@wdio/reporter": "^9.12.6",
+    "prettier": "^3.5.3"
   },
   "devDependencies": {
     "chai": "^5.2.0",
