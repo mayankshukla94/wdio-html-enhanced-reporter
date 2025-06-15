@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mayankshukla94/wdio-custom-reporter.git"
+    "url": "git+https://github.com/mayankshukla94/wdio-html-enhanced-reporter"
   },
   "keywords": [
     "webdriverio",
@@ -34,9 +34,9 @@
   "author": "Mayank Shukla",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mayankshukla94/wdio-custom-reporter/issues"
+    "url": "https://github.com/mayankshukla94/wdio-html-enhanced-reporter/issues"
   },
-  "homepage": "https://github.com/mayankshukla94/wdio-custom-reporter#readme",
+  "homepage": "https://github.com/mayankshukla94/wdio-html-enhanced-reporter#readme",
   "dependencies": {
     "@wdio/reporter": "^9.12.6",
     "prettier": "^3.5.3"
