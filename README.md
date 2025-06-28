@@ -66,3 +66,8 @@ exports.config = {
   },
 };
 ```
+
+📦 Available on [NPM](https://www.npmjs.com/package/wdio-html-enhanced-reporter)
+
+💻 Source code and documentation on [GitHub](https://github.com/mayankshukla94/wdio-html-enhanced-reporter)
+
