@@ -26,7 +26,7 @@ function renderSuite(suite) {
 
       <div class="suite">
         <div class="suite-header">
-          <div class="suite-title">${suite.title}</div>
+          <div class="suite-title">${escapeHtml(suite.title)}</div>
           <div class="suite-stats">
             Tests: ${total} | Passed: ${passed} | Failed: ${failed} | Skipped: ${skipped}
           </div>
@@ -45,7 +45,7 @@ function renderTests(suite) {
       test => `
         <div class="test ${test.state}">
             <div class="test-header">
-                <div class="test-title">${test.title}</div>
+                <div class="test-title">${escapeHtml(test.title)}</div>
                 <div class="test-duration">${test.duration}ms</div>
             </div>
             
@@ -53,8 +53,8 @@ function renderTests(suite) {
               test.error
                 ? `
             <div class="test-error">
-                <strong>Error:</strong> ${test.error.message}
-                <pre>${test.error.stack}</pre>
+                <strong>Error:</strong> ${escapeHtml(test.error.message || '')}
+                <pre>${escapeHtml(test.error.stack || '')}</pre>
             </div>
             `
                 : ''
