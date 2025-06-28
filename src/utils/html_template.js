@@ -92,6 +92,7 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     margin-bottom: 20px;
                     padding: 15px;
                     border-radius: 4px;
+                    background-color: #d4edda;
                 }
                 .test.passed {
                     background-color: #d4edda;

@@ -79,7 +79,7 @@ describe('Custom HtmlReporter', function () {
       title: 'Test 2',
       parentUid: 's3',
       duration: 123,
-      error: { message: 'Oops', stack: 'stacktrace' },
+      error: { message: 'Oops', stack: 'stacktrace <stack>' },
     };
 
     reporter.onSuiteStart(suite);
@@ -98,7 +98,7 @@ describe('Custom HtmlReporter', function () {
     const suite = { uid: 's4', title: 'Suite 4', parentUid: null };
     const test = {
       uid: 't3',
-      title: 'Test 3',
+      title: 'Test 3 <special_tags>',
       parentUid: 's4',
       duration: 100,
     };
