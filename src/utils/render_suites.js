@@ -16,8 +16,9 @@ function renderSuite(suite) {
     suite.file
       ? `
       <div class="spec-file-name">
-        <p class="spec-file">
-          ${suite.file ? suite.file : ''}
+        <p class="spec-file-bar">
+          <span class="file-name">${suite.file || ''}</span>
+          ${suite.totalTestsInSpec ? `<span class="test-count">Total Tests: ${suite.totalTestsInSpec}</span>` : ''}
         </p>
       </div>`
       : ''

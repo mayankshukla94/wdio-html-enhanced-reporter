@@ -44,16 +44,24 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     width: ${passRate}%;
                 }
                 .spec-file-name {
-                    background-color: #f0f0f0;
-                    padding: 8px 12px;
-                    border-left: 5px solid #007acc;
-                    margin: 20px 0 10px;
-                    font-family: monospace;
+                    margin-top: 5px;
+                    padding: 1px 12px;
+                    background-color: #e6f4ea;
+                    border-left: 4px solid #007bff;
+                    font-weight: bold;
                 }
-                .spec-file {
-                    margin: 0;
-                    font-size: 14px;
+                .spec-file-bar {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .file-name {
+                    font-size: 1em;
                     color: #333;
+                }
+                .test-count {
+                    font-size: 0.95em;
+                    color: #666;
                 }
                 .suite {
                     margin-bottom: 20px;
