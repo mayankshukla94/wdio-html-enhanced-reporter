@@ -45,6 +45,7 @@ class CustomHtmlReporter extends WDIOReporter {
     this.currentTestUid = null;
     this.testScreenshots = {};
     this.testLogs = {};
+    this.testCountPerSpec = {};
 
     process.on('test:screenshot', filepath => {
       if (this.currentTestUid) {
@@ -76,6 +77,10 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onSuiteStart(suite) {
     const parentUid = suite.parentUid || suite.parent || null;
+    let file =
+      !parentUid && this.specs && this.specFileIndex < this.specs.length
+        ? new URL(this.specs[this.specFileIndex++]).pathname
+        : '';
 
     const newSuite = {
       uid: suite.uid,
@@ -83,10 +88,8 @@ class CustomHtmlReporter extends WDIOReporter {
       tests: [],
       suites: [],
       parentUid,
-      file:
-        !parentUid && this.specs && this.specFileIndex < this.specs.length
-          ? new URL(this.specs[this.specFileIndex++]).pathname
-          : '',
+      file,
+      totalTestsInSpec: this.testCountPerSpec[file] || 0,
     };
 
     if (!this.suiteMapByTitle.has(suite.title)) {
@@ -111,6 +114,12 @@ class CustomHtmlReporter extends WDIOReporter {
   }
 
   onTestStart(test) {
+    const currentFile = this.specs[this.specFileIndex - 1];
+
+    if (!this.testCountPerSpec[currentFile]) this.testCountPerSpec[currentFile] = 0;
+
+    this.testCountPerSpec[currentFile]++;
+
     const parentUid = test.parentUid || test.parent || null;
     let currentSuite = Helper.findSuiteByUid(parentUid, this.suites, this.suiteMapByTitle);
 
@@ -218,22 +227,22 @@ class CustomHtmlReporter extends WDIOReporter {
 
   onRunnerEnd() {
     this.endTime = new Date();
+
+    for (const suite of this.suites) {
+      suite.totalTestsInSpec = this.countTestsInSuite(suite);
+    }
+
     this.generateReport();
   }
 
-  onLogMessage(data) {
-    const currentSuite = Helper.findSuiteByUid(data.parentUid, this.suites, this.suiteMapByTitle);
-    if (currentSuite) {
-      const currentTest = currentSuite.tests.find(t => t.uid === data.uid);
-      if (currentTest) {
-        if (currentTest.logs.length < 50) {
-          currentTest.logs.push({
-            level: data.level,
-            message: String(data.message).substring(0, 500),
-          });
-        }
-      }
+  countTestsInSuite(suite) {
+    let count = suite.tests.length;
+
+    for (const nestedSuite of suite.suites) {
+      count += this.countTestsInSuite(nestedSuite);
     }
+
+    return count;
   }
 
   generateReport() {
