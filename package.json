@@ -14,29 +14,21 @@
   "keywords": [
     "webdriverio",
     "wdio",
-    "html",
-    "reporter",
-    "custom",
-    "reporter",
-    "wdio",
-    "reporter",
-    "test",
-    "reporter",
-    "webdriverio",
-    "reporter",
-    "automated",
-    "testing",
-    "screenshot",
-    "reporter",
-    "nodejs",
-    "reporter"
+    "html-reporter",
+    "custom-reporter",
+    "test-reporter",
+    "automation",
+    "e2e-testing",
+    "mocha",
+    "screenshot-reporter",
+    "nodejs"
   ],
   "author": "Mayank Shukla",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mayankshukla94/wdio-html-enhanced-reporter/issues"
   },
-  "homepage": "https://github.com/mayankshukla94/wdio-html-enhanced-reporter#readme",
+  "homepage": "https://www.npmjs.com/package/wdio-html-enhanced-reporter",
   "dependencies": {
     "@wdio/reporter": "^9.12.6",
     "prettier": "^3.5.3"
