@@ -20,6 +20,9 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 h1, h2, h3, h4 {
                     margin-top: 20px;
                 }
+                .hide{
+                  display: none;
+                }
                 .summary {
                     background-color: #f5f5f5;
                     padding: 15px;
@@ -192,13 +195,20 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     color: white;
                     border-color: #007bff;
                 }
-                .expand-all, .collapse-all {
+                .reporter-actions{
+                  display: flex;
+                  justify-content: space-between;
+                }
+                .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test{
                     margin-right: 10px;
                     padding: 5px 10px;
                     background-color: #f8f9fa;
                     border: 1px solid #ddd;
                     border-radius: 4px;
                     cursor: pointer;
+                }
+                .active{
+                  background-color: #e6f4ea;
                 }
                 .modal {
                     display: none;
@@ -263,7 +273,7 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
         </head>
         <body>
             <h1>${options.reportTitle}</h1>
-            
+
             <div class="summary">
                 <div class="summary-row">
                     <div>Total Specs: ${specs.length}</div>
@@ -280,14 +290,21 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     <div class="progress-bar-fill"></div>
                 </div>
             </div>
-            
+
             <h2>Test Results</h2>
-            <div>
+              <div class="reporter-actions">
+             <div>
                 <button class="expand-all">Expand All</button>
                 <button class="collapse-all">Collapse All</button>
+             </div>
+
+             <div class="filters">
+               <button onClick="hideFailingTests(this)" class="hide-failing-test">Hide Failing Test</button>
+               <button onClick="hidePassingTests(this)" class="hide-passing-test">Hide Passing Test</button>
+             </div>
             </div>
             ${renderSuites(suites)}
-            
+
             <!-- Screenshot Modal -->
             <div class="modal" id="screenshotModal">
                 <span class="modal-close">&times;</span>
@@ -309,14 +326,14 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                         body.style.display = body.style.display === 'none' ? 'block' : 'none';
                     });
                 });
-                
+
                 // Expand all button
                 document.querySelector('.expand-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
                         body.style.display = 'block';
                     });
                 });
-                
+
                 // Collapse all button
                 document.querySelector('.collapse-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
@@ -330,6 +347,40 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                         event.target.parentNode.classList.toggle('expand');
                     }
                 })
+
+                function hideTest({selector, filterButton, filterButtonText}){
+                  document.querySelectorAll(selector).forEach(test=>test.classList.add('hide'))
+                  filterButton.classList.add('active')
+                  filterButton.textContent=filterButtonText
+                }
+
+                function showTest({selector, filterButton, filterButtonText}){
+                  document.querySelectorAll(selector).forEach(test=>test.classList.remove('hide'))
+                  filterButton.classList.remove('active')
+                  filterButton.textContent=filterButtonText
+                }
+
+                function hideFailingTests(filterButtonRef){
+                 if(!filterButtonRef.classList.contains("active")){
+                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Test"})
+                  document.querySelector("button.hide-passing-test").disabled=true;
+                 }
+                 else{
+                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Test"})
+                  document.querySelector("button.hide-passing-test").disabled=false;
+                 }
+                }
+
+                function hidePassingTests(filterButtonRef){
+                 if(!filterButtonRef.classList.contains("active")){
+                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Test"})
+                  document.querySelector("button.hide-failing-test").disabled=true;
+                 }
+                 else{
+                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Test"})
+                  document.querySelector("button.hide-failing-test").disabled=false;
+                 }
+                }
             </script>
         </body>
         </html>
