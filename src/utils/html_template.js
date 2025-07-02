@@ -299,8 +299,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
              </div>
 
              <div class="filters">
-               <button onClick="hideFailingTests(this)" class="hide-failing-test">Hide Failing Test</button>
-               <button onClick="hidePassingTests(this)" class="hide-passing-test">Hide Passing Test</button>
+               <button onClick="hideFailingTests(this)" class="hide-failing-test">Hide Failing Tests</button>
+               <button onClick="hidePassingTests(this)" class="hide-passing-test">Hide Passing Tests</button>
              </div>
             </div>
             ${renderSuites(suites)}
@@ -363,20 +363,20 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 // Hide Failing Tests
                 function hideFailingTests(filterButtonRef){
                  if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Test"});
+                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Tests"});
                  }
                  else{
-                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Test"});
+                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Tests"});
                  }
                 }
 
-                // Show Failing Tests
+                // Hide Passing Tests
                 function hidePassingTests(filterButtonRef){
                  if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Test"});
+                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Tests"});
                  }
                  else{
-                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Test"});
+                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Tests"});
                  }
                 }
             </script>
