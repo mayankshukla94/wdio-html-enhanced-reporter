@@ -349,36 +349,34 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 })
 
                 function hideTest({selector, filterButton, filterButtonText}){
-                  document.querySelectorAll(selector).forEach(test=>test.classList.add('hide'))
-                  filterButton.classList.add('active')
-                  filterButton.textContent=filterButtonText
+                  document.querySelectorAll(selector).forEach(test=>test.classList.add('hide'));
+                  filterButton.classList.add('active');
+                  filterButton.textContent=filterButtonText;
                 }
 
                 function showTest({selector, filterButton, filterButtonText}){
-                  document.querySelectorAll(selector).forEach(test=>test.classList.remove('hide'))
-                  filterButton.classList.remove('active')
-                  filterButton.textContent=filterButtonText
+                  document.querySelectorAll(selector).forEach(test=>test.classList.remove('hide'));
+                  filterButton.classList.remove('active');
+                  filterButton.textContent=filterButtonText;
                 }
 
+                // Hide Failing Tests
                 function hideFailingTests(filterButtonRef){
                  if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Test"})
-                  document.querySelector("button.hide-passing-test").disabled=true;
+                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Test"});
                  }
                  else{
-                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Test"})
-                  document.querySelector("button.hide-passing-test").disabled=false;
+                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Test"});
                  }
                 }
 
+                // Show Failing Tests
                 function hidePassingTests(filterButtonRef){
                  if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Test"})
-                  document.querySelector("button.hide-failing-test").disabled=true;
+                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Test"});
                  }
                  else{
-                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Test"})
-                  document.querySelector("button.hide-failing-test").disabled=false;
+                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Test"});
                  }
                 }
             </script>
