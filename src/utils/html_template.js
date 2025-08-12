@@ -299,10 +299,10 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 </div>
 
                 <div class="filters">
-                    <button onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
+                    <button class="hide-failing-test" onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
                         Hide Failing Tests
                     </button>
-                    <button onClick="toggleTests(this, 'div.test.passed', 'Show Passing Tests', 'Hide Passing Tests')">
+                    <button class="hide-passing-test" onClick="toggleTests(this, 'div.test.passed', 'Show Passing Tests', 'Hide Passing Tests')">
                         Hide Passing Tests
                     </button>
                 </div>
