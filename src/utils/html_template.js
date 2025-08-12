@@ -20,8 +20,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 h1, h2, h3, h4 {
                     margin-top: 20px;
                 }
-                .hide {
-                    display: none;
+                .hide{
+                  display: none;
                 }
                 .summary {
                     background-color: #f5f5f5;
@@ -195,9 +195,9 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     color: white;
                     border-color: #007bff;
                 }
-                .reporter-actions {
-                    display: flex;
-                    justify-content: space-between;
+                .reporter-actions{
+                  display: flex;
+                  justify-content: space-between;
                 }
                 .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test {
                     margin-right: 10px;
@@ -207,8 +207,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     border-radius: 4px;
                     cursor: pointer;
                 }
-                .active {
-                    background-color: #e6f4ea;
+                .active{
+                  background-color: #e6f4ea;
                 }
                 .modal {
                     display: none;
@@ -273,7 +273,7 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
         </head>
         <body>
             <h1>${options.reportTitle}</h1>
-
+            
             <div class="summary">
                 <div class="summary-row">
                     <div>Total Specs: ${specs.length}</div>
@@ -290,25 +290,25 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     <div class="progress-bar-fill"></div>
                 </div>
             </div>
-
+            
             <h2>Test Results</h2>
-              <div class="reporter-actions">
-             <div>
-                <button class="expand-all">Expand All</button>
-                <button class="collapse-all">Collapse All</button>
-             </div>
+            <div class="reporter-actions">
+                <div>
+                    <button class="expand-all">Expand All</button>
+                    <button class="collapse-all">Collapse All</button>
+                </div>
 
-             <div class="filters">
-                <button class="hide-failing-test" onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
-                    Hide Failing Tests
-                </button>
-                <button class="hide-passing-test" onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
-                    Hide Failing Tests
-                </button>
-             </div>
+                <div class="filters">
+                    <button onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
+                        Hide Failing Tests
+                    </button>
+                    <button onClick="toggleTests(this, 'div.test.passed', 'Show Passing Tests', 'Hide Passing Tests')">
+                        Hide Passing Tests
+                    </button>
+                </div>
             </div>
             ${renderSuites(suites)}
-
+            
             <!-- Screenshot Modal -->
             <div class="modal" id="screenshotModal">
                 <span class="modal-close">&times;</span>
@@ -330,14 +330,14 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                         body.style.display = body.style.display === 'none' ? 'block' : 'none';
                     });
                 });
-
+                
                 // Expand all button
                 document.querySelector('.expand-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
                         body.style.display = 'block';
                     });
                 });
-
+                
                 // Collapse all button
                 document.querySelector('.collapse-all').addEventListener('click', () => {
                     document.querySelectorAll('.suite-body').forEach(body => {
@@ -352,12 +352,12 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     }
                 })
 
-               function toggleTests(button, selector, showText, hideText) {
+                function toggleTests(button, selector, showText, hideText) {
                     const isActive = button.classList.contains("active");
 
                     document.querySelectorAll(selector).forEach(test =>
                         test.classList.toggle('hide', !isActive)
-                    );            
+                    );
 
                     button.classList.toggle('active', !isActive);
                     button.textContent = isActive ? hideText : showText;
