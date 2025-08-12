@@ -21,7 +21,7 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     margin-top: 20px;
                 }
                 .hide {
-                  display: none;
+                    display: none;
                 }
                 .summary {
                     background-color: #f5f5f5;
@@ -196,8 +196,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     border-color: #007bff;
                 }
                 .reporter-actions {
-                  display: flex;
-                  justify-content: space-between;
+                    display: flex;
+                    justify-content: space-between;
                 }
                 .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test {
                     margin-right: 10px;
@@ -207,8 +207,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     border-radius: 4px;
                     cursor: pointer;
                 }
-                .active{
-                  background-color: #e6f4ea;
+                .active {
+                    background-color: #e6f4ea;
                 }
                 .modal {
                     display: none;
