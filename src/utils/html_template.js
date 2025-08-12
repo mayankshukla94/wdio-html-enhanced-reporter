@@ -20,7 +20,7 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 h1, h2, h3, h4 {
                     margin-top: 20px;
                 }
-                .hide{
+                .hide {
                   display: none;
                 }
                 .summary {
@@ -195,11 +195,11 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     color: white;
                     border-color: #007bff;
                 }
-                .reporter-actions{
+                .reporter-actions {
                   display: flex;
                   justify-content: space-between;
                 }
-                .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test{
+                .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test {
                     margin-right: 10px;
                     padding: 5px 10px;
                     background-color: #f8f9fa;
@@ -299,8 +299,12 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
              </div>
 
              <div class="filters">
-               <button onClick="hideFailingTests(this)" class="hide-failing-test">Hide Failing Tests</button>
-               <button onClick="hidePassingTests(this)" class="hide-passing-test">Hide Passing Tests</button>
+                <button class="hide-failing-test" onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
+                    Hide Failing Tests
+                </button>
+                <button class="hide-passing-test" onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
+                    Hide Failing Tests
+                </button>
              </div>
             </div>
             ${renderSuites(suites)}
@@ -348,36 +352,15 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     }
                 })
 
-                function hideTest({selector, filterButton, filterButtonText}){
-                  document.querySelectorAll(selector).forEach(test=>test.classList.add('hide'));
-                  filterButton.classList.add('active');
-                  filterButton.textContent=filterButtonText;
-                }
+               function toggleTests(button, selector, showText, hideText) {
+                   const isActive = button.classList.contains("active");
 
-                function showTest({selector, filterButton, filterButtonText}){
-                  document.querySelectorAll(selector).forEach(test=>test.classList.remove('hide'));
-                  filterButton.classList.remove('active');
-                  filterButton.textContent=filterButtonText;
-                }
+                   document.querySelectorAll(selector).forEach(test =>
+                        test.classList.toggle('hide', !isActive)
+                    );            
 
-                // Hide Failing Tests
-                function hideFailingTests(filterButtonRef){
-                 if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Show Failing Tests"});
-                 }
-                 else{
-                  showTest({selector:"div.test.failed", filterButton:filterButtonRef, filterButtonText:"Hide Failing Tests"});
-                 }
-                }
-
-                // Hide Passing Tests
-                function hidePassingTests(filterButtonRef){
-                 if(!filterButtonRef.classList.contains("active")){
-                  hideTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Show Passing Tests"});
-                 }
-                 else{
-                  showTest({selector:"div.test.passed", filterButton:filterButtonRef, filterButtonText:"Hide Passing Tests"});
-                 }
+                    button.classList.toggle('active', !isActive);
+                    button.textContent = isActive ? hideText : showText;
                 }
             </script>
         </body>
