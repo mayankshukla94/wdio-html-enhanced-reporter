@@ -353,9 +353,9 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 })
 
                function toggleTests(button, selector, showText, hideText) {
-                   const isActive = button.classList.contains("active");
+                    const isActive = button.classList.contains("active");
 
-                   document.querySelectorAll(selector).forEach(test =>
+                    document.querySelectorAll(selector).forEach(test =>
                         test.classList.toggle('hide', !isActive)
                     );            
 
