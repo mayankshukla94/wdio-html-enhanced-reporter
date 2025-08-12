@@ -20,6 +20,9 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                 h1, h2, h3, h4 {
                     margin-top: 20px;
                 }
+                .hide{
+                  display: none;
+                }
                 .summary {
                     background-color: #f5f5f5;
                     padding: 15px;
@@ -192,13 +195,20 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     color: white;
                     border-color: #007bff;
                 }
-                .expand-all, .collapse-all {
+                .reporter-actions{
+                  display: flex;
+                  justify-content: space-between;
+                }
+                .expand-all, .collapse-all, .hide-passing-test, .hide-failing-test {
                     margin-right: 10px;
                     padding: 5px 10px;
                     background-color: #f8f9fa;
                     border: 1px solid #ddd;
                     border-radius: 4px;
                     cursor: pointer;
+                }
+                .active{
+                  background-color: #e6f4ea;
                 }
                 .modal {
                     display: none;
@@ -282,9 +292,20 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
             </div>
             
             <h2>Test Results</h2>
-            <div>
-                <button class="expand-all">Expand All</button>
-                <button class="collapse-all">Collapse All</button>
+            <div class="reporter-actions">
+                <div>
+                    <button class="expand-all">Expand All</button>
+                    <button class="collapse-all">Collapse All</button>
+                </div>
+
+                <div class="filters">
+                    <button onClick="toggleTests(this, 'div.test.failed', 'Show Failing Tests', 'Hide Failing Tests')">
+                        Hide Failing Tests
+                    </button>
+                    <button onClick="toggleTests(this, 'div.test.passed', 'Show Passing Tests', 'Hide Passing Tests')">
+                        Hide Passing Tests
+                    </button>
+                </div>
             </div>
             ${renderSuites(suites)}
             
@@ -330,6 +351,17 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                         event.target.parentNode.classList.toggle('expand');
                     }
                 })
+
+                function toggleTests(button, selector, showText, hideText) {
+                    const isActive = button.classList.contains("active");
+
+                    document.querySelectorAll(selector).forEach(test =>
+                        test.classList.toggle('hide', !isActive)
+                    );
+
+                    button.classList.toggle('active', !isActive);
+                    button.textContent = isActive ? hideText : showText;
+                }
             </script>
         </body>
         </html>
