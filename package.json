@@ -1,6 +1,6 @@
 {
   "name": "wdio-html-enhanced-reporter",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "Light weight custom reporter for large wdio automation projects",
   "main": "index.js",
   "type": "module",
