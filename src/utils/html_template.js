@@ -1,6 +1,12 @@
 import { renderSuites } from './render_suites.js';
 
-export function getHtmlTemplete(suites, specs, options, passRate, totalDuration, results, total) {
+export function getHtmlTemplete(suites, specs, options, passRate, totalDuration, results, total, hasFailures) {
+  const statusBanner = `
+    <div class="status-banner ${hasFailures ? 'failed' : 'passed'}">
+      <h2>${hasFailures ? '❌ Build Failed' : '✅ Build Successful'}</h2>
+    </div>
+  `;
+
   return `
         <!DOCTYPE html>
         <html lang="en">
@@ -290,6 +296,8 @@ export function getHtmlTemplete(suites, specs, options, passRate, totalDuration,
                     <div class="progress-bar-fill"></div>
                 </div>
             </div>
+
+            ${statusBanner}
             
             <h2>Test Results</h2>
             <div class="reporter-actions">
