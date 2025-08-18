@@ -225,6 +225,28 @@ class CustomHtmlReporter extends WDIOReporter {
     }
   }
 
+  onHookEnd(hook) {
+    if (hook.error) {
+      this.hasFailures = true;
+
+      const parentSuite = this.findSuiteByUid(hook.parentUid, this.suites);
+      if (parentSuite) {
+        parentSuite.tests.push({
+          uid: hook.uid,
+          title: `${hook.title} (hook)`,
+          state: 'failed',
+          duration: hook._duration || 0,
+          logs: [],
+          screenshots: [],
+          error: {
+            message: hook.error.message,
+            stack: hook.error.stack,
+          },
+        });
+      }
+    }
+  }
+
   onRunnerEnd() {
     this.endTime = new Date();
 
@@ -232,7 +254,10 @@ class CustomHtmlReporter extends WDIOReporter {
       suite.totalTestsInSpec = this.countTestsInSuite(suite);
     }
 
-    this.generateReport();
+    const hasTestFailures = this.suites.some(suite => suite.tests.some(test => test.state === 'failed'));
+    const hasFailures = hasTestFailures || this.hasFailures;
+
+    this.generateReport(hasFailures);
   }
 
   countTestsInSuite(suite) {
@@ -245,7 +270,7 @@ class CustomHtmlReporter extends WDIOReporter {
     return count;
   }
 
-  generateReport() {
+  generateReport(hasFailures = false) {
     if (!existsSync(this.options.outputDir)) {
       mkdirSync(this.options.outputDir, { recursive: true });
     }
@@ -257,6 +282,7 @@ class CustomHtmlReporter extends WDIOReporter {
       this.endTime,
       this.specs,
       this.options,
+      hasFailures,
     );
 
     const reportPath = join(this.options.outputDir, this.options.filename);
